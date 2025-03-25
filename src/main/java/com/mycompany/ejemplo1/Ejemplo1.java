@@ -86,28 +86,33 @@ public class Ejemplo1 {
         }
     }
 
-    public static void actualizarEstudiante(Scanner escaner) {
+    public static void actualizarEstudiante(Scanner scanner) {
         System.out.print("Ingrese el ID del estudiante a actualizar: ");
-        int id = escaner.nextInt();
-        escaner.nextLine();
+        int id = scanner.nextInt();
+        scanner.nextLine();
         System.out.print("Ingrese el nuevo nombre: ");
-        String nombre = escaner.nextLine();
+        String nombre = scanner.nextLine();
         System.out.print("Ingrese la nueva edad: ");
-        int edad = escaner.nextInt();
-        escaner.nextLine();
+        int edad = scanner.nextInt();
+        scanner.nextLine();
 
-        Connection cnx = obtenerConexion();
-        if (cnx != null) {
-            try {
-                Statement declaracion = cnx.createStatement();
-                String sql = "UPDATE estudiantes SET nombre='" + nombre + "', edad=" + edad + " WHERE id=" + id;
-                declaracion.executeUpdate(sql); 
-                System.out.println("Estudiante actualizado.");
-                declaracion.close();
-                cnx.close();
-            } catch (SQLException e) {
-                System.out.println("Error: " + e.getMessage());
+        String consulta = "UPDATE estudiantes SET nombre = ?, edad = ? WHERE id = ?";
+
+        try (Connection conexion = BaseDeDatos.obtenerConexion();
+             PreparedStatement declaracion = conexion.prepareStatement(consulta)) {
+
+            declaracion.setString(1, nombre);
+            declaracion.setInt(2, edad);
+            declaracion.setInt(3, id);
+            int filasAfectadas = declaracion.executeUpdate();
+
+            if (filasAfectadas > 0) {
+                System.out.println("Estudiante actualizado exitosamente.");
+            } else {
+                System.out.println("No se encontró un estudiante con ese ID.");
             }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error al actualizar estudiante: {0}", e.getMessage());
         }
     }
 
