@@ -1,15 +1,23 @@
 
-
 package com.mycompany.ejemplo1;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.sql.*;
 import java.util.Scanner;
 
-public class Ejemplo1 {
+class BaseDeDatos {
     static final String url = "jdbc:postgresql://localhost:5432/universidad";
     static final String usuario = "postgres";
     static final String contraseña = "postgres"; 
 
+    public static Connection obtenerConexion() throws SQLException {
+        return DriverManager.getConnection(url, usuario, contraseña);
+    }
+}
+
+public class Ejemplo1 {
+    private static final Logger LOGGER = Logger.getLogger(Ejemplo1.class.getName());
     public static void main(String[] args) {
         Scanner escaner = new Scanner(System.in);
         while (true) {
@@ -34,14 +42,6 @@ public class Ejemplo1 {
         escaner.close();
     }
 
-    public static Connection obtenerConexion() {
-        try {
-            return DriverManager.getConnection(url, usuario, contraseña);
-        } catch (SQLException e) {
-            System.out.println("Error de conexión: " + e.getMessage());
-            return null; 
-        }
-    }
 
     public static void agregarEstudiante(Scanner escaner) {
         System.out.print("Ingrese el nombre del estudiante: ");
