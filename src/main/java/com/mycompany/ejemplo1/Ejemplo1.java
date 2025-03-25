@@ -116,23 +116,26 @@ public class Ejemplo1 {
         }
     }
 
-    public static void eliminarEstudiante(Scanner escaner) {
+    public static void eliminarEstudiante(Scanner scanner) {
         System.out.print("Ingrese el ID del estudiante a eliminar: ");
-        int id = escaner.nextInt();
-        escaner.nextLine();
+        int id = scanner.nextInt();
+        scanner.nextLine();
 
-        Connection cnx = obtenerConexion();
-        if (cnx != null) {
-            try {
-                Statement declaracion = cnx.createStatement();
-                String sql = "DELETE FROM estudiantes WHERE id=" + id;
-                declaracion.executeUpdate(sql); 
-                System.out.println("Estudiante eliminado.");
-                declaracion.close();
-                cnx.close();
-            } catch (SQLException e) {
-                System.out.println("Error: " + e.getMessage());
+        String consulta = "DELETE FROM estudiantes WHERE id = ?";
+
+        try (Connection conexion = BaseDeDatos.obtenerConexion();
+             PreparedStatement declaracion = conexion.prepareStatement(consulta)) {
+
+            declaracion.setInt(1, id);
+            int filasAfectadas = declaracion.executeUpdate();
+
+            if (filasAfectadas > 0) {
+                System.out.println("Estudiante eliminado exitosamente.");
+            } else {
+                System.out.println("No se encontró un estudiante con ese ID.");
             }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error al eliminar estudiante: {0}", e.getMessage());
         }
     }
 }
