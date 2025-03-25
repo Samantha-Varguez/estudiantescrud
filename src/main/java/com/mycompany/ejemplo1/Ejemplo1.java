@@ -70,19 +70,19 @@ public class Ejemplo1 {
     }
 
     public static void verEstudiantes() {
-        Connection cnx = obtenerConexion();
-        if (cnx != null) {
-            try {
-                Statement declaracion = cnx.createStatement();
-                ResultSet resultado = declaracion.executeQuery("SELECT * FROM estudiantes");
-                while (resultado.next()) {
-                    System.out.println(resultado.getInt("id") + " - " + resultado.getString("nombre") + " - " + resultado.getInt("edad"));
-                }
-                declaracion.close();
-                cnx.close(); 
-            } catch (SQLException e) {
-                System.out.println("Error: " + e.getMessage());
+        String consulta = "SELECT * FROM estudiantes";
+
+        try (Connection conexion = BaseDeDatos.obtenerConexion();
+             PreparedStatement declaracion = conexion.prepareStatement(consulta);
+             ResultSet resultado = declaracion.executeQuery()) {
+
+            while (resultado.next()) {
+                System.out.println(resultado.getInt("id") + " - " +
+                                   resultado.getString("nombre") + " - " +
+                                   resultado.getInt("edad"));
             }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error al obtener estudiantes: {0}", e.getMessage());
         }
     }
 
