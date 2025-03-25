@@ -25,43 +25,47 @@ public class Ejemplo1 {
             int opcion = escaner.nextInt();
             escaner.nextLine(); // Consumir nueva línea
 
-            if (opcion == 1) {
-                agregarEstudiante(escaner);
-            } else if (opcion == 2) {
-                verEstudiantes();
-            } else if (opcion == 3) {
-                actualizarEstudiante(escaner);
-            } else if (opcion == 4) {
-                eliminarEstudiante(escaner);
-            } else if (opcion == 5) {
-                break;
-            } else {
-                System.out.println("Opción no válida");
+            switch (opcion) {
+                case 1:
+                    agregarEstudiante(escaner);
+                    break;
+                case 2:
+                    verEstudiantes();
+                    break;
+                case 3:
+                    actualizarEstudiante(escaner);
+                    break;
+                case 4:
+                    eliminarEstudiante(escaner);
+                    break;
+                case 5:
+                    System.out.println("Saliendo...");
+                    escaner.close();
+                    return;
+                default:
+                    System.out.println("Opción no válida");
             }
         }
-        escaner.close();
     }
-
 
     public static void agregarEstudiante(Scanner escaner) {
         System.out.print("Ingrese el nombre del estudiante: ");
         String nombre = escaner.nextLine();
         System.out.print("Ingrese la edad del estudiante: ");
         int edad = escaner.nextInt();
-        escaner.nextLine(); // Consumir nueva línea
+        escaner.nextLine(); 
 
-        Connection cnx = obtenerConexion();
-        if (cnx != null) {
-            try {
-                Statement declaracion = cnx.createStatement();
-                String sql = "INSERT INTO estudiantes (nombre, edad) VALUES ('" + nombre + "', " + edad + ")";
-                declaracion.executeUpdate(sql); // 🔴 Inyección SQL
-                System.out.println("Estudiante agregado.");
-                declaracion.close();
-                cnx.close();
-            } catch (SQLException e) {
-                System.out.println("Error: " + e.getMessage());
-            }
+        String consulta = "INSERT INTO estudiantes (nombre, edad) VALUES (?, ?)";
+
+        try (Connection conexion = BaseDeDatos.obtenerConexion();
+             PreparedStatement declaracion = conexion.prepareStatement(consulta)) {
+
+            declaracion.setString(1, nombre);
+            declaracion.setInt(2, edad);
+            declaracion.executeUpdate();
+            System.out.println("Estudiante agregado exitosamente.");
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error al agregar estudiante: {0}", e.getMessage());
         }
     }
 
@@ -117,7 +121,7 @@ public class Ejemplo1 {
             try {
                 Statement declaracion = cnx.createStatement();
                 String sql = "DELETE FROM estudiantes WHERE id=" + id;
-                declaracion.executeUpdate(sql); // 🔴 Inyección SQL
+                declaracion.executeUpdate(sql); 
                 System.out.println("Estudiante eliminado.");
                 declaracion.close();
                 cnx.close();
